@@ -2,34 +2,21 @@ local lib = require("neotest.lib")
 local async = require("neotest.async")
 local nio = require("nio")
 
--- HACK: hack around a bug in neotest, they use this plenary.filetype module wrapped in a memoization
--- function, and this library sets up filetype detection on the first call, meaning the first call
--- can return no match (which is weird and bad by itself) but that is compounded by neotest just
--- using that value for ever afterwards.
--- This call will cause plenary to load the filetype and makes neotest later memoize the right thing.
-require("plenary.filetype").detect_from_extension("node_test.odin")
-
 ---@type neotest.Adapter
 local adapter = { name = "neotest-odin", dap = { adapter = "" } }
 
 adapter.root = lib.files.match_root_pattern(".git")
 
-local has_parser, error = vim.treesitter.language.add('odin')
+local has_parser, _ = vim.treesitter.language.add("odin")
 if not has_parser then
-  print('missing odin parser, run TSInstall odin')
+	print("missing odin parser, run TSInstall odin")
 	return
 else
-  print('odin parser is present')
+	print("odin parser is present")
 end
 
 function adapter.is_test_file(file_path)
-	local is_test = vim.endswith(file_path, ".odin")
-	if is_test then
-		-- NOTE: to not show files without tests in the UI, we have to check this here too :(
-		is_test = next(adapter.discover_positions(file_path)._children) ~= nil
-	end
-
-	return is_test
+	return vim.endswith(file_path, "_test.odin")
 end
 
 function adapter.discover_positions(file_path)
@@ -157,38 +144,6 @@ end
 ---@param tree neotest.Tree
 ---@return table<string, neotest.Result[]>
 function adapter.results(spec, result, tree)
-	local function remove_prefix(str, prefix)
-		if str:sub(1, #prefix) == prefix then
-			return str:sub(#prefix + 2)
-		else
-			return str
-		end
-	end
-
-	-- local function map_errors(errors, path)
-	--   local neoerrors = {}
-	--   for _, error in ipairs(errors) do
-	--     -- NOTE: only accepts line, only wants errors in the file of the test.
-	--     if error.location.file_path == path then
-	--       table.insert(neoerrors, {
-	--         message = error.message,
-	--         line    = error.location.line - 1,
-	--       })
-	--     end
-	--   end
-	--   return neoerrors
-	-- end
-	--
-	-- local function map_short(errors, cwd)
-	--   local neoerrors = {}
-	--   for _, error in ipairs(errors) do
-	--     local path = remove_prefix(error.location.file_path, cwd)
-	--
-	--     table.insert(neoerrors, path .. ":" .. error.location.line .. ":" .. error.location.column .. ": " .. error.location.procedure .. "() " .. error.message)
-	--   end
-	--   return table.concat(neoerrors, "\n")
-	-- end
-
 	local results = {}
 
 	-- Build failure with DAP strategy.
