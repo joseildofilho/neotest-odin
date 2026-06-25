@@ -35,7 +35,7 @@ function adapter.discover_positions(file_path)
 	local tree = lib.treesitter.parse_positions(file_path, query, {
 		require_namespaces = false,
 		nested_tests = false,
-		position_id = function(position, parents)
+		position_id = function(position, _)
 			if position.type == "namespace" then
 				assert(namespace == "", "double namespace?")
 				namespace = position.name
@@ -46,7 +46,7 @@ function adapter.discover_positions(file_path)
 				return id
 			end
 
-			return nil
+			return ""
 		end,
 	})
 	return tree
@@ -138,12 +138,7 @@ function adapter.build_spec(args)
 	end
 end
 
----@async
----@param spec neotest.RunSpec
----@param result neotest.StrategyResult
----@param tree neotest.Tree
----@return table<string, neotest.Result[]>
-function adapter.results(spec, result, tree)
+function adapter.results(spec, _, tree)
 	local results = {}
 
 	-- Build failure with DAP strategy.
@@ -200,7 +195,7 @@ function adapter.results(spec, result, tree)
 			local pkg = parts[1]
 			local name = parts[2]
 
-			pkg_tests = report.packages[pkg]
+			local pkg_tests = report.packages[pkg]
 			if pkg_tests then
 				for _, test in ipairs(pkg_tests) do
 					if test.name == name then
