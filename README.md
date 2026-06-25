@@ -178,3 +178,15 @@ Before submitting a contribution:
 - Keep changes focused and well-documented.
 - Include a clear description of the problem being solved.
 
+## Acknowledgements
+
+Special thanks to [Laytan](https://github.com/laytan) for publishing the original
+`neotest-odin.lua` prototype, which served as inspiration and a valuable reference
+during the development of this adapter.
+
+The Neovim, Neotest, and Odin communities have also provided excellent tooling,
+documentation, and examples that made this project possible.
+
+References:
+
+- https://gist.github.com/laytan/bbc7b8062e173e907ec72ad02cebb8a7
